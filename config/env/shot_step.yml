@@ -1,0 +1,26 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2020, Diego Garcia Huerta.
+#
+# Your use of this software as distributed in this GitHub repository, is
+# governed by the Apache License 2.0
+#
+# Your use of the Shotgun Pipeline Toolkit is governed by the applicable
+# license agreement between you and Autodesk / Shotgun.
+#
+# The full license is in the file LICENSE, distributed with this software.
+# ----------------------------------------------------------------------------
+
+
+# Author: Diego Garcia Huerta
+# Contact: https://www.linkedin.com/in/diegogh/
+#
+# YOU SHOULD MERGE these entries into your environment file, as
+# THIS FILE BY ITSELF WILL NOT WORK
+# These are the additions to get the engine up and running with the
+# default tk-apps for this environment
+
+includes:
+- ./includes/settings/tk-blender.yml
+
+engines:
+  tk-blender: "@settings.tk-blender.shot_step"

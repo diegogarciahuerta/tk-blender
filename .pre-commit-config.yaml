@@ -1,0 +1,42 @@
+# ----------------------------------------------------------------------------
+# Copyright (c) 2020, Diego Garcia Huerta.
+#
+# Your use of this software as distributed in this GitHub repository, is
+# governed by the Apache License 2.0
+#
+# Your use of the Shotgun Pipeline Toolkit is governed by the applicable license
+# agreement between you and Autodesk / Shotgun.
+#
+# The full license is in the file LICENSE, distributed with this software.
+# ----------------------------------------------------------------------------
+
+
+# Styles the code properly
+# Exclude the UI files, as they are auto-generated.
+exclude: "ui\/.*py$"
+# List of super useful formatters.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    # Ensures the code is syntaxically correct
+    - id: check-ast
+      language_version: python3
+    # Ensures a file name will resolve on all platform
+    - id: check-case-conflict
+    # Checks files with the execute bit set have shebangs
+    # - id: check-executables-have-shebangs
+    # Ensure there's no incomplete merges
+    - id: check-merge-conflict
+    # Adds an empty line if missing at the end of a file.
+    - id: end-of-file-fixer
+    # Makes sure requirements.txt is properly formatted
+    - id: requirements-txt-fixer
+    # Removes trailing whitespaces.
+    - id: trailing-whitespace
+  # Leave black at the bottom so all touchups are done before it is run.
+  - repo: https://github.com/ambv/black
+    rev: 20.8b1
+    hooks:
+    - id: black
+      language_version: python3

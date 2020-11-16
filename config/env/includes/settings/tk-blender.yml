@@ -1,0 +1,122 @@
+# Copyright (c) 2017 Shotgun Software Inc.
+#
+# CONFIDENTIAL AND PROPRIETARY
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
+# Source Code License included in this distribution package. See LICENSE.
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
+# not expressly granted therein are reserved by Shotgun Software Inc.
+#
+
+################################################################################
+
+includes:
+- ../app_locations.yml
+- ../engine_locations.yml
+- ./tk-multi-loader2.yml
+- ./tk-multi-publish2.yml
+- ./tk-multi-screeningroom.yml
+- ./tk-multi-shotgunpanel.yml
+- ./tk-multi-snapshot.yml
+- ./tk-multi-workfiles2.yml
+- ./tk-multi-breakdown.yml
+- ./tk-multi-setframerange.yml
+- ./tk-multi-shotgunpanel.yml
+
+################################################################################
+
+# asset
+settings.tk-blender.asset:
+  apps:
+    tk-multi-about:
+      location: "@apps.tk-multi-about.location"
+    tk-multi-screeningroom: "@settings.tk-multi-screeningroom.rv"
+    tk-multi-shotgunpanel: "@settings.tk-multi-shotgunpanel.blender"
+    tk-multi-workfiles2: "@settings.tk-multi-workfiles2.blender.project"
+  menu_favourites:
+  - {app_instance: tk-multi-workfiles2, name: File Open...}
+  debug_logging: false
+  location: "@engines.tk-blender.location"
+
+# asset_step
+settings.tk-blender.asset_step:
+  apps:
+    tk-multi-about:
+      location: "@apps.tk-multi-about.location"
+    tk-multi-breakdown: "@settings.tk-multi-breakdown.blender"
+    tk-multi-loader2: "@settings.tk-multi-loader2.blender"
+    tk-multi-publish2: "@settings.tk-multi-publish2.blender.asset_step"
+    tk-multi-screeningroom: "@settings.tk-multi-screeningroom.rv"
+    tk-multi-shotgunpanel: "@settings.tk-multi-shotgunpanel.blender"
+    tk-multi-snapshot: "@settings.tk-multi-snapshot.blender.asset_step"
+    tk-multi-workfiles2: "@settings.tk-multi-workfiles2.blender.asset_step"
+  menu_favourites:
+  - {app_instance: tk-multi-workfiles2, name: File Open...}
+  - {app_instance: tk-multi-snapshot, name: Snapshot...}
+  - {app_instance: tk-multi-workfiles2, name: File Save...}
+  - {app_instance: tk-multi-publish2, name: Publish...}
+  template_project: asset_work_area_blender
+  location: "@engines.tk-blender.location"
+
+# project
+settings.tk-blender.project:
+  apps:
+    tk-multi-about:
+      location: "@apps.tk-multi-about.location"
+    tk-multi-screeningroom: "@settings.tk-multi-screeningroom.rv"
+    tk-multi-shotgunpanel: "@settings.tk-multi-shotgunpanel.blender"
+    tk-multi-workfiles2: "@settings.tk-multi-workfiles2.blender.project"
+  menu_favourites:
+  - {app_instance: tk-multi-workfiles2, name: File Open...}
+  debug_logging: true
+  compatibility_dialog_min_version: 3
+  automatic_context_switch: true
+  location: "@engines.tk-blender.location"
+
+# sequence
+settings.tk-blender.sequence:
+  apps:
+    tk-multi-about:
+      location: "@apps.tk-multi-about.location"
+    tk-multi-screeningroom: "@settings.tk-multi-screeningroom.rv"
+    tk-multi-shotgunpanel: "@settings.tk-multi-shotgunpanel.blender"
+    tk-multi-workfiles2: "@settings.tk-multi-workfiles2.blender.project"
+  menu_favourites:
+  - {app_instance: tk-multi-workfiles2, name: File Open...}
+  location: "@engines.tk-blender.location"
+
+# shot
+settings.tk-blender.shot:
+  apps:
+    tk-multi-about:
+      location: "@apps.tk-multi-about.location"
+    tk-multi-screeningroom: "@settings.tk-multi-screeningroom.rv"
+    tk-multi-shotgunpanel: "@settings.tk-multi-shotgunpanel.blender"
+    tk-multi-workfiles2: "@settings.tk-multi-workfiles2.blender.project"
+  menu_favourites:
+  - {app_instance: tk-multi-workfiles2, name: File Open...}
+  location: "@engines.tk-blender.location"
+
+# shot_step
+settings.tk-blender.shot_step:
+  apps:
+    tk-multi-about:
+      location: "@apps.tk-multi-about.location"
+    tk-multi-breakdown: "@settings.tk-multi-breakdown.blender"
+    tk-multi-setframerange: "@settings.tk-multi-setframerange.blender"
+    tk-multi-loader2: "@settings.tk-multi-loader2.blender"
+    tk-multi-publish2: "@settings.tk-multi-publish2.blender.shot_step"
+    tk-multi-screeningroom: "@settings.tk-multi-screeningroom.rv"
+    tk-multi-shotgunpanel: "@settings.tk-multi-shotgunpanel.blender"
+    tk-multi-snapshot: "@settings.tk-multi-snapshot.blender.shot_step"
+    tk-multi-workfiles2: "@settings.tk-multi-workfiles2.blender.shot_step"
+    tk-multi-pythonconsole:
+      location: '@apps.tk-multi-pythonconsole.location'
+  menu_favourites:
+  - {app_instance: tk-multi-workfiles2, name: File Open...}
+  - {app_instance: tk-multi-snapshot, name: Snapshot...}
+  - {app_instance: tk-multi-workfiles2, name: File Save...}
+  - {app_instance: tk-multi-publish2, name: Publish...}
+  template_project: shot_work_area_blender
+  location: "@engines.tk-blender.location"

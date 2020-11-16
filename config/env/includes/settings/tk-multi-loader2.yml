@@ -1,0 +1,79 @@
+# ##### BEGIN GPL LICENSE BLOCK #####
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software Foundation,
+#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#
+# ##### END GPL LICENSE BLOCK #####
+
+
+# Author: Diego Garcia Huerta
+# Contact: https://www.linkedin.com/in/diegogh/
+#
+# YOU SHOULD MERGE these entries into your settings file, as
+# THIS FILE BY ITSELF WILL NOT WORK
+# These are the additions to get the engine up and running with the
+# default tk-apps for this environment
+#
+
+# blender
+settings.tk-multi-loader2.blender:
+  actions_hook: '{engine}/tk-multi-loader2/tk-blender_actions.py'
+  action_mappings:
+    Alembic Cache: [import]
+    Abc File: [import]
+    Dae File: [import]
+    Collada File: [import]
+    Bvh File: [import]
+    Motion Capture File: [import]
+    Svg File: [import]
+    Scalable Vector Graphics File: [import]
+    Ply File: [import]
+    Stanford File: [import]
+    Stl File: [import]
+    Glb File: [import]
+    Gltf File: [import]
+    Obj File: [import]
+    Wavefront File: [import]
+    X3d File: [import]
+    Wrl File: [import]
+    X3d Extensible 3D File: [import]
+    Blender Project File: [link, append]
+    Wav File: [asSequencerSound]
+    Sound File: [asSequencerSound]
+    Movie File: [asSequencerMovie, asCompositorNodeMovieClip]
+    Image File: [asSequencerImage, asCompositorNodeImage]
+    Texture File: [asSequencerImage, asCompositorNodeImage]
+    Sound: [asSequencerSound]
+    Movie: [asSequencerMovie, asCompositorNodeMovieClip]
+    Image: [asSequencerImage, asCompositorNodeImage]
+    Texture: [asSequencerImage, asCompositorNodeImage]
+  entities:
+  - caption: Assets
+    entity_type: Asset
+    filters:
+    - [project, is, "{context.project}"]
+    hierarchy: [sg_asset_type, code]
+  - caption: Shots
+    entity_type: Shot
+    filters:
+    - [project, is, "{context.project}"]
+    hierarchy: [sg_sequence, code]
+  - caption: My Tasks
+    entity_type: Task
+    filters:
+    - [task_assignees, is, "{context.user}"]
+    - [project, is, "{context.project}"]
+    hierarchy: [entity, content]
+  publish_filters: [["sg_status_list", "is_not", null]]
+  location: "@apps.tk-multi-loader2.location"
