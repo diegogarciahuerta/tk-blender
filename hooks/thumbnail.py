@@ -15,9 +15,8 @@ import os
 import tempfile
 import uuid
 
-import tank
 from tank import Hook
-from tank.platform.qt import QtCore, QtGui
+from tank.platform.qt import QtGui
 
 
 __author__ = "Diego Garcia Huerta"

@@ -16,12 +16,10 @@ Menu handling for this engine
 
 """
 
-import tank
 import sys
-import os
 import subprocess
-import unicodedata
 
+import tank
 from tank.util import is_windows, is_linux, is_macos
 from tank.platform.qt import QtGui, QtCore
 
@@ -75,7 +73,6 @@ class MenuGenerator(object):
     def __init__(self, engine, menu_name):
         self._engine = engine
         self._menu_name = menu_name
-        qApp = QtGui.QApplication.instance()
         self._handle = QtGui.QMenu(self._menu_name)
 
     def hide(self):
@@ -83,7 +80,6 @@ class MenuGenerator(object):
 
     def show(self, pos=None):
         pos = QtGui.QCursor.pos() if pos is None else QtCore.QPoint(pos[0], pos[1])
-        qApp = QtGui.QApplication.instance()
 
         self._handle.activateWindow()
         self._handle.raise_()
@@ -157,7 +153,7 @@ class MenuGenerator(object):
                 if app_name is None:
                     # un-parented app
                     app_name = "Other Items"
-                if not app_name in commands_by_app:
+                if app_name not in commands_by_app:
                     commands_by_app[app_name] = []
                 commands_by_app[app_name].append(cmd)
 
@@ -204,9 +200,6 @@ class MenuGenerator(object):
         ctx_name = str(ctx)
 
         # create the menu object
-        # the label expects a unicode object so we cast it to support when the
-        # context may contain info with non-ascii characters
-
         ctx_menu = self._add_sub_menu(ctx_name, self._handle)
 
         self._add_divider(ctx_menu)
@@ -301,8 +294,6 @@ class AppCommand(object):
         self.favourite = False
         self.logger = logger
 
-        engine = self.parent._engine
-
     def get_app_name(self):
         """
         Returns the name of the app that this command belongs to
@@ -336,11 +327,6 @@ class AppCommand(object):
         if "app" in self.properties:
             app = self.properties["app"]
             doc_url = app.documentation_url
-            # deal with nuke's inability to handle unicode. #fail
-            if doc_url.__class__ == unicode:
-                doc_url = unicodedata.normalize("NFKD", doc_url).encode(
-                    "ascii", "ignore"
-                )
             return doc_url
 
         return None

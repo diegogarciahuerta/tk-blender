@@ -15,6 +15,7 @@ import os
 import sgtk
 
 from tank_vendor import six
+from sgtk.util.filesystem import ensure_folder_exists
 
 import bpy
 
@@ -263,9 +264,6 @@ class BlenderSessionGeometryPublishPlugin(HookBaseClass):
             instances.
         :param item: Item to process
         """
-
-        publisher = self.parent
-        engine = publisher.engine
 
         # get the path to create and publish
         publish_path = item.properties["path"]

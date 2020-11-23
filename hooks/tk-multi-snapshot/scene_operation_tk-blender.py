@@ -11,13 +11,9 @@
 # ----------------------------------------------------------------------------
 
 
-import os
-
 import bpy
 
-import tank
 from tank import Hook
-from tank import TankError
 
 
 __author__ = "Diego Garcia Huerta"

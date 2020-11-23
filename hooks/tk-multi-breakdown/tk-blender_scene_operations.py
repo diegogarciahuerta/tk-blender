@@ -56,8 +56,6 @@ class BreakdownSceneItem(str):
     """
 
     def __new__(cls, node, node_type):
-        in_use = True
-
         if node_type == "library":
             object_names = [obj.name for obj in node.users_id if obj]
             if len(object_names) > 5:

@@ -14,7 +14,7 @@
 import os
 import sys
 import imp
-
+import time
 import ast
 import inspect
 
@@ -33,9 +33,6 @@ if ext_libs and os.path.exists(ext_libs):
         print("Added path: %s" % ext_libs)
         site.addsitedir(ext_libs)
 
-from PySide2 import QtWidgets, QtCore
-
-
 bl_info = {
     "name": "Shotgun Bridge Plugin",
     "description": "Shotgun Toolkit Engine for Blender",
@@ -43,15 +40,50 @@ bl_info = {
     "license": "GPL",
     "deps": "",
     "version": (1, 0, 0),
-    "blender": getattr(bpy.app, "version"),
+    "blender": (2, 82, 0),
     "location": "Shotgun",
     "warning": "",
     "wiki_url": "https://github.com/diegogarciahuerta/tk-blender/releases",
     "tracker_url": "https://github.com/diegogarciahuerta/tk-blender/issues",
     "link": "https://github.com/diegogarciahuerta/tk-blender",
     "support": "COMMUNITY",
-    "category": "Import-Export",
+    "category": "User Interface",
 }
+
+
+PYSIDE2_MISSING_MESSAGE = (
+    "\n"
+    + "-" * 80
+    + "\nCould not import PySide2 as a Python module. Shotgun menu will not be available."
+    + "\n\nPlease check the engine documentation for more information:"
+    + "\nhttps://github.com/diegogarciahuerta/tk-blender/edit/master/README.md\n"
+    + "-" * 80
+)
+
+try:
+    from PySide2 import QtWidgets, QtCore
+
+    PYSIDE2_IMPORTED = True
+except ModuleNotFoundError:
+    PYSIDE2_IMPORTED = False
+
+
+class ShotgunConsoleLog(bpy.types.Operator):
+    """
+    A simple operator to log issues to the console.
+    """
+
+    bl_idname = "shotgun.logger"
+    bl_label = "Shotgun Logger"
+
+    message: bpy.props.StringProperty(name="message", description="message", default="")
+
+    level: bpy.props.StringProperty(name="level", description="level", default="INFO")
+
+    def execute(self, context):
+        self.report({self.level}, self.message)
+        return {"FINISHED"}
+
 
 # based on
 # https://github.com/vincentgires/blender-scripts/blob/master/scripts/addons/qtutils/core.py
@@ -220,7 +252,7 @@ def boostrap():
     engine_startup_path = os.environ.get("SGTK_BLENDER_ENGINE_STARTUP")
     engine_startup = imp.load_source("sgtk_blender_engine_startup", engine_startup_path)
 
-    # Fire up Toolkit and the environment engine when there's time.
+    # Fire up Toolkit and the environment engine.
     engine_startup.start_toolkit()
 
 
@@ -230,7 +262,19 @@ def startup(dummy):
     boostrap()
 
 
+@persistent
+def error_importing_pyside2(*args):
+    bpy.ops.shotgun.logger(level="ERROR", message=PYSIDE2_MISSING_MESSAGE)
+
+
 def register():
+    bpy.utils.register_class(ShotgunConsoleLog)
+
+    if not PYSIDE2_IMPORTED:
+        # bpy.app.timers.register(error_importing_pyside2, first_interval=5)
+        load_factory_startup_post.append(error_importing_pyside2)
+        return
+
     bpy.utils.register_class(QtWindowEventLoop)
     TOPBAR_MT_help = bpy.types.TOPBAR_MT_help
     TOPBAR_MT_editor_menus = insert_main_menu(
@@ -243,4 +287,9 @@ def register():
 
 
 def unregister():
+    bpy.utils.unregister_class(ShotgunConsoleLog)
+
+    if not PYSIDE2_IMPORTED:
+        return
+
     bpy.utils.unregister_class(TOPBAR_MT_shotgun)

@@ -1,12 +1,6 @@
 ![build](https://github.com/diegogarciahuerta/tk-blender_pre/workflows/build/badge.svg)
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
 
-
->:warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction:
-># DO NOT USE  - WORK IN PROGRESS
->:warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction::warning::construction:
-
-
 # Shotgun toolkit engine for Blender
 
 Contact : [Diego Garcia Huerta](https://www.linkedin.com/in/diegogh/)
@@ -22,8 +16,9 @@ Implementation of a shotgun engine for [**Blender**](https://blender.org). It su
 * [Modifying the toolkit configuration files to add this engine and related apps](#modifying-the-toolkit-configuration-files-to-add-this-engine-and-related-apps)
 * [Modifying the Templates](#modifying-the-templates)
 * [Configuring Blender in the software launcher](#configuring-blender-in-the-software-launcher)
+* [Configuring Blender Engine Requirements](#configuring-blender-engine-requirements)
 * [Caching and downloading the engine into disk](#caching-and-downloading-the-engine-into-disk)
-* [Blender engine should be ready to use](#blender-engine-should-be-ready-to-use)
+* [Blender engine should be available in Shotgun Desktop](#blender-engine-should-be-available-in-shotgun-desktop)
 * [Toolkit Apps Included](#toolkit-apps-included)
 
 With the engine, hooks for most of the standard tk applications are provided:
@@ -38,12 +33,13 @@ With the engine, hooks for most of the standard tk applications are provided:
 More:
 * [Blender engine options](#blender-engine-options)
 * [Development notes](#development-notes)
-  * [Shotgun Toolkit development notes](#shotgun-toolkit-development-notes)
-  * [Blender development notes](#blender-development-notes)
+  * [Blender Development notes](#blender-development-notes)
+  * [Python3 Shotgun toolkit](#python3-shotgun-toolkit)
+  * [PySide2 Shotgun Toolkit support](#pyside2-shotgun-toolkit-support)
 
 **Disclaimer**
 
-**This engine has been developed and tested in Windows 10 using Blender version 2.83.0**
+**This engine has been developed and tested in Windows 10 using the following Blender versions: 2.82.0, 2.83.0, 2.90.0, 2.92.0 (alpha)**
 
 The engine has not been used in production before so **use it at your own risk**. Also keep in mind that some of the hooks provided might need to be adapted to your work flows and pipelines. If you use it in production, I would love to hear about it, drop me a message in the contact link at the beginning of this documentation.
 
@@ -128,6 +124,7 @@ I've included a folder called 'config' in this repository where you can find the
 These YAML files provided **should be merged with the original ones as they won't work on their own.**
 
 As an example, for the location of the engine, we use a git descriptor that allows up to track the code from a git repository. This allows easy updates, whenever a new version is released. So in the example above, you should modify the file:
+
 ``.../game_config/config/env/includes/engine_locations.yml``
 
 and add the following changes from this file:
@@ -145,14 +142,17 @@ engines.tk-blender.location:
 **Do not forget to update the version of the engine to the latest one. You can check here which one is the [latest version](https://github.com/diegogarciahuerta/tk-blender/releases)**
 
 In your environments you should add tk-blender yml file, for example in the asset_step yml file:
-``/configs/game_config/env/asset_step.yml``
+
+``/configs/game_config/config/env/asset_step.yml``
 
 Let's add the include at the beginning of the file, in the 'includes' section:
+
 ```yaml
 - ./includes/settings/tk-blender.yml
 ```
 
 Now we add a new entry under the engines section, that will include all the information for our Blender application:
+
 ```yaml
   tk-blender: "@settings.tk-blender.asset_step"
 ```
@@ -160,6 +160,8 @@ Now we add a new entry under the engines section, that will include all the info
 And so on.
 
 Finally, do not forget to copy the additional `tk-blender.yml` into your settings folder.
+
+``/configs/game_config/config/env/includes/settings``
 
 
 ## Modifying the Templates
@@ -189,6 +191,44 @@ In order for our application to show up in the shotgun launcher, we need to add 
 If you want more information on how to configure software launches, here is the detailed documentation from shotgun.
 [Configuring software launches](https://support.shotgunsoftware.com/hc/en-us/articles/115000067493#Configuring%20the%20software%20in%20Shotgun%20Desktop)
 
+## Configuring Blender Engine Requirements
+
+# PySide2 Installation
+
+PySide2 is required to run toolkit applications. It must be installed in a place where python within Blender can find it as a module.
+
+One option is to install this library within the bundled python version that comes with Blender: (windows example)
+
+`C:\Program Files\Blender Foundation\Blender 2.82\2.82\python\bin\python.exe -m pip install PySide2`
+
+If you are using Windows, make sure you run and Administrator console, as the vanilla installation of Blender might be in `Program Files` folder, which only administrators have write access to.
+
+Alternatively for more modular pipelines, where the location of Pyside2 is more bespoke:
+
+`PYSIDE2_PYTHONPATH` Environment variable can be used to configure this location if you decide not to install it within Blender python site-packages.
+
+If the shotgun menu does not show up after you launch Blender from Shotgun Desktop, please check the console for any possible errors:
+
+![tk-blender_09](config/images/tk-blender_09.png)
+
+# tk-framework-shotgunutils v5.7.7+
+
+Please make sure you use this version (or above) of tk-framework-shotgunutils. In some cases, I've found that Blender would freeze when closing toolkit applications while these application were doing some operations (ie. searching for workfiles in tk-multi-workfiles2, or even in tk-multi-about displaying the current environment).
+The good news is that I was not able to reproduce the problem if I updated to the a recent version of tk-framework-shotgunutils (version v5.7.7 or above), which fixes some issues with threading that were causing Blender to freeze.
+
+You can modify the version for this framework here:
+``/configs/game_config/config/env/includes/frameworks.yml``
+
+It should look something like:
+
+```yaml
+  # shotgunutils v5 - Shotgun Related Utilities
+  tk-framework-shotgunutils_v5.x.x:
+    location:
+      version: v5.7.8
+      type: app_store
+      name: tk-framework-shotgunutils
+```
 
 ## Caching and downloading the engine into disk
 
@@ -203,18 +243,11 @@ One last step is to cache the engine and apps from the configuration files into 
 ![tank_cache_apps](config/images/tank_cache_apps.png)
 
 
-## Blender engine should be ready to use
+## Blender engine should be available in Shotgun Desktop
 
 If we now go back and forth from our project in shotgun desktop ( < arrow top left if you are already within a project ), we should be able to see Blender as an application to launch.
 
 <img src="./config/images/engine_is_configured.png" width="50%" alt="engine_is_configured">
-
-## Enable the Shotgun Plugin Engine within Blender
-
-One last step! PySide2 is required to run toolkit applications. It must be installed in a place where python within Blender can find it as a module.
-
-<img src="./config/images/enable_plugin.png" width="100%" alt="engine_is_configured">
-
 
 ## Blender engine options:
 
@@ -223,6 +256,7 @@ Given past tk-engine development experiences, I decided to throw a couple of ext
 `BLENDER_BIN_DIR`: defines where the blender executable directory is. This is used in case you decide to install Blender in a different location than the default on. Note that the toolkit official way to achieve the same is by using [tk-multi-launchapp](https://github.com/shotgunsoftware/tk-multi-launchapp), but for less complicated cases, this environment variable should be sufficient.
 
 `SGTK_BLENDER_CMD_EXTRA_ARGS`: defines extra arguments that will be passed to blender executable when is run. For example, you might want to enable debugging within blender with the argument --debug-all. For more information about what arguments Blender takes from the command line, take a look at:
+
 [Blender Command Line arguments](https://docs.blender.org/manual/en/latest/advanced/command_line/arguments.html)
 
 ## Toolkit Apps Included
@@ -312,9 +346,11 @@ Please adjust this logic accordingly to however you want to handle frame ranges 
 
 The way this engine works is via a [Blender Operator](resources/extensions) that triggers the instancing of the Blender toolkit engine. Once the engine is up and running, the [menus](python/tk_blender/menu_generation.py) are created as normal using PySide2 widgets, very similar to other engines. After trying several qt styles to match the blender style I decided to not go for it, because it was causing other problems within the tk-apps. There is a rough attempt to match the size of the font from Blender menus.
 
-Note that the way the menu is created in the main bar is a bit of a hack in my opinion, as I literally re-registered
+Note that the way the menu is created in the main toolbar is a bit of a hack in my opinion. Initially I copy and pasted code from actual blender libraries and re-registered the whole main toolbar, which seemed to work. Unfortunately this solution was not super reliable because that piece of code used in Blender could change (in fact it changed from minor version to minor version). So I resorted to a bit more extreme way to modify the code using AST [Abstract Syntax Trees](https://docs.python.org/3.7/library/ast.html) , which allowed me to modify the code programatically.
 
-# Blender development notes
+Hopefully this solution works for newer versions of Blender, otherwise [this code will need to be revisited](https://github.com/diegogarciahuerta/tk-blender/blob/3e4c0bb9a1b70e3a6fc5d1401a434dc3a9cc5c5b/resources/scripts/startup/Shotgun_menu.py#L124)
+
+### Blender Development notes
 
 The biggest challenge writing this engine was a personal one, as it was the first time I had to get deep into Blender/Blender API. Getting used to new terminology, finding anything in the User Interface and figuring out what question to ask when I was having a problem was as expected a big part what kept me busy.
 
@@ -322,19 +358,26 @@ Blender is really powerful, and I feel I've just scratched the surface when it c
 
 It took me a while to get accustomed to Blender API, the concept of operators for everything was something new to me. Said this, their documentation is excellent and everything needed seems to be accessible through the API. For someone new to Blender like me, it is a matter to know what you are looking for in most cases, but once you get used to the terminology it is not difficult to find a solution. One thing that is tricky to keep up with is the rapid evolution of Blender and it's API. While this is a good thing, I found in many cases solutions that no longer applied to the current version I was using.
 
-**Python3 Shotgun toolkit**
+Once thing that is missinig in my opinion is a clear way to give feedback to artists that something is gone wrong. I spent quite a fair amout of time trying to research what is the best approach for this and seems like the recommended way is to log the error to the console, which I think is way too technical for artists. I see that there is the Blender Info Log window, but seems to not be used in the way I expected. I'm hoping this is due to my limited knowledge of the software and a more user friendly approach is available, if so, please let me know!
+
+### Python3 Shotgun toolkit
 
 Thanks to the Shotgun development team, we have Python3 support which is a hard requirement for Blender. I actually started writing this engine way before Python3 was on the cards, using a client/server architecture to communicate between two different versions of Python. Ultimately I felt like it was not the right approach and resorted to delay the work until a proper Python3 integration could be done.
 
-**PySide2 Shotgun Toolkit support**
+### PySide2 Shotgun Toolkit support
 
 Since Blender has it's own unique User Interface system, I needed to include PySide2 for the tk-apps to work. Initially I tried to make the menus native to Blender, but I got in trouble with operators and the dynamic nature of Shotgun menus (based on the current context). After several failed attempts, I decided that menus would also be made in PySide2, mostly because I could reuse almost all the code from other engines I've written and all the tk-apps would require it anyway. I welcome someone with the right knowledge of Blender to show a way to create dynamic menus with sub-menus on the fly, which is what is required for the integration to work.
 
 I thank all the people that came first when it comes to making PySide2 and Blender event loops happy. My implementation of PySide2 inside Blender is heavily based in multiple already existing solutions, for example:
+
 [blender-scripts - vincentgires](https://github.com/vincentgires/blender-scripts/blob/master/scripts/addons/qtutils/core.py)
+
 [bqt - techartorg](https://github.com/techartorg/bqt)
+
 [blender_pyside2_example - vfxpipeline](https://github.com/vfxpipeline/blender_pyside2_example)
+
 [Blender Qt test - jasperges](https://gitlab.com/snippets/1881226)
+
 ***
 
 For completion, I've kept the original README from shotgun, that include very valuable links:

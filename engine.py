@@ -20,7 +20,6 @@ import os
 import sys
 import time
 import atexit
-import inspect
 import logging
 import traceback
 
@@ -90,7 +89,7 @@ def on_scene_event_callback(*args, **kwargs):
     """
     Callback that's run whenever a scene is saved or opened.
     """
-    from sgtk.platform.qt import QtGui, QtCore
+    from sgtk.platform.qt import QtGui
 
     try:
         refresh_engine()
@@ -304,7 +303,7 @@ class BlenderEngine(Engine):
         host_info = {"name": "Blender", "version": "unknown"}
         try:
             host_info["version"] = bpy.app.version_string
-        except Exceptions as e:
+        except Exception:
             pass
         return host_info
 
@@ -358,7 +357,7 @@ class BlenderEngine(Engine):
                     MIN_COMPATIBILITY_VERSION,
                 )
             )
-            show_error(msg)
+            self.show_error(msg)
             raise tank.TankError(msg)
 
         if app_ver > MIN_COMPATIBILITY_VERSION:
@@ -386,7 +385,7 @@ class BlenderEngine(Engine):
             if show_warning_dlg:
                 # Note, title is padded to try to ensure dialog isn't insanely
                 # narrow!
-                show_info(msg)
+                self.show_info(msg)
 
             # always log the warning to the script editor:
             self.logger.warning(msg)

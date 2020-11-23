@@ -308,8 +308,6 @@ class BlenderActions(HookBaseClass):
         :param sg_publish_data: Shotgun data dictionary with all the standard
                                 publish fields.
         """
-        app = self.parent
-
         if not os.path.exists(path):
             raise TankError("File not found on disk - '%s'" % path)
 
@@ -331,8 +329,6 @@ class BlenderActions(HookBaseClass):
         :param sg_publish_data: Shotgun data dictionary with all the standard
                                 publish fields.
         """
-        app = self.parent
-
         if not os.path.exists(path):
             raise TankError("File not found on disk - '%s'" % path)
 

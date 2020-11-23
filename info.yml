@@ -100,6 +100,3 @@ description: "Shotgun Integration in Blender"
 # Required minimum versions for this item to run
 requires_shotgun_version:
 requires_core_version: "v0.18.8"
-
-# frameworks:
-#     - {"name": "tk-framework-pyside2", "version": "v1.x.x"}
