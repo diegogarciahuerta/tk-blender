@@ -266,7 +266,7 @@ Given past tk-engine development experiences, I decided to throw a couple of ext
 
 This application forms the basis for file management in the Shotgun Pipeline Toolkit. It lets you jump around quickly between your various Shotgun entities and gets you started working quickly. No path needs to be specified as the application manages that behind the scenes. The application helps you manage your working files inside a Work Area and makes it easy to share your work with others.
 
-Basic ![hooks](hooks/tk-multi-workfiles2) have been implemented for this tk-app to work. open, save, save_as, reset, and current_path are the scene operations implemented.
+Basic [hooks](hooks/tk-multi-workfiles2) have been implemented for this tk-app to work. open, save, save_as, reset, and current_path are the scene operations implemented.
 
 Check the configurations included for more details:
 [additions to the configs](config/env)
@@ -276,14 +276,14 @@ Check the configurations included for more details:
 
 A Shotgun Snapshot is a quick incremental backup that lets you version and manage increments of your work without sharing it with anyone else. Take a Snapshot, add a description and a thumbnail, and you create a point in time to which you can always go back to at a later point and restore. This is useful if you are making big changes and want to make sure you have a backup of previous versions of your scene.
 
-![Hook](hooks/tk-multi-snapshot/scene_operation_tk-blender.py) is provided to be able to use this tk-app, similar to workfiles2.
+[Hook](hooks/tk-multi-snapshot/scene_operation_tk-blender.py) is provided to be able to use this tk-app, similar to workfiles2.
 
 ## [tk-multi-loader2](https://support.shotgunsoftware.com/hc/en-us/articles/219033078)
 ![tk-blender_01](config/images/tk-blender_01.png)
 
 The Shotgun Loader lets you quickly overview and browse the files that you have published to Shotgun. A searchable tree view navigation system makes it easy to quickly get to the task, shot or asset that you are looking for and once there the loader shows a thumbnail based overview of all the publishes for that item. Through configurable hooks you can then easily reference or import a publish into your current scene.
 
-![Hook](hooks/tk-multi-loader2/tk-blender_actions.py) These are the supported actions:
+[Hook](hooks/tk-multi-loader2/tk-blender_actions.py) These are the supported actions:
 
 `append`:  [Append Library file](https://docs.blender.org/manual/en/latest/files/linked_libraries/introduction.html#append-and-link).This action will append the collections of the blender file  (.blend) that the publish file represents into the current scene.
 Append makes a full copy of the data into your blend-file, without keeping any reference to the original one. You can make further edits to your local copy of the data, but changes in the external source file will not be reflected in the referencing file.
@@ -318,7 +318,7 @@ For more information about supported formats in Blender, check: [Import-Export A
 
 The Publish app allows artists to publish their work so that it can be used by artists downstream. It supports traditional publishing workflows within the artist’s content creation software as well as stand-alone publishing of any file on disk. When working in content creation software and using the basic Shotgun integration, the app will automatically discover and display items for the artist to publish. For more sophisticated production needs, studios can write custom publish plugins to drive artist workflows.
 
-The basic publishing of the current session is provided as ![hooks](hooks/tk-multi-publish2/basic) for this app.
+The basic publishing of the current session is provided as [hooks](hooks/tk-multi-publish2/basic) for this app.
 
 The engine also provides the ability to publish alembic caches from the current scene. This is configured for the *asset step* environment.
 
@@ -327,7 +327,7 @@ The engine also provides the ability to publish alembic caches from the current 
 
 The Scene Breakdown App shows you a list of items you have loaded in your scene and tells you which ones are out of date.
 
-![Hook](hooks/tk-multi-breakdown/tk-blender_scene_operations.py) is provided to display the following elements that are part of the current blender scene:
+[Hook](hooks/tk-multi-breakdown/tk-blender_scene_operations.py) is provided to display the following elements that are part of the current blender scene:
 
 Libraries (linked .blend files), Cache Files, Images, Movie Clips, Texts, and Sounds.
 
@@ -338,7 +338,7 @@ Note that in most cases the update functionality works out of the box, except fo
 
 This is a simple yet useful app that syncs your current file with the latest frame range in Shotgun for the associated shot. If a change to the cut has come in from editorial, quickly and safely update the scene you are working on using this app. Towards the end, it will display a UI with information about what got changed.
 
-![Hook](hooks/tk-multi-setframerange/frame_operations_tk-blender.py) is provided to set the frame range within Blender for a *shot_step* environment.
+[Hook](hooks/tk-multi-setframerange/frame_operations_tk-blender.py) is provided to set the frame range within Blender for a *shot_step* environment.
 
 Please adjust this logic accordingly to however you want to handle frame ranges in your pipeline.
 
