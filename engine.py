@@ -528,12 +528,12 @@ class BlenderEngine(Engine):
             if old_context != new_context:
                 self.create_shotgun_menu()
 
-        self.execute_hook_method(
-            tank.platform.constants.CONTEXT_CHANGE_HOOK,
-            "post_context_change",
-            previous_context=old_context,
-            current_context=new_context,
-        )
+            self.sgtk.execute_core_hook_method(
+                tank.platform.constants.CONTEXT_CHANGE_HOOK,
+                "post_context_change",
+                previous_context=old_context,
+                current_context=new_context,
+            )
 
     def _run_app_instance_commands(self):
         """
