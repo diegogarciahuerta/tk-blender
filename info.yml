@@ -25,6 +25,13 @@ configuration:
                      context every time the currently loaded file changes. Defaults to True."
         default_value: True
 
+    context_change:
+        type: hook
+        parameters: []
+        description: Triggered on context change, e.g. project to shot_step
+        allows_empty: True
+        default_value: None
+
     compatibility_dialog_min_version:
         type: int
         description: "Specify the minimum Application major version that will prompt a warning if
