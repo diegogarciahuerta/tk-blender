@@ -30,4 +30,4 @@
 engines.tk-blender.location:
   type: git
   path: https://github.com/diegogarciahuerta/tk-blender
-  version: v1.0.0
+  version: v1.1.1
