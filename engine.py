@@ -532,7 +532,7 @@ class BlenderEngine(Engine):
             tank.platform.constants.CONTEXT_CHANGE_HOOK,
             "post_context_change",
             previous_context=old_context,
-            current_context=new_context
+            current_context=new_context,
         )
 
     def _run_app_instance_commands(self):
