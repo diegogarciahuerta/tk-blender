@@ -366,19 +366,19 @@ class BlenderActions(HookBaseClass):
             bpy.ops.wm.collada_import(context, filepath=path, as_background_job=False)
 
         elif extension_name in dir(bpy.ops.import_scene):
-            importer = getattr(bpy.ops.import_scene)
+            importer = getattr(bpy.ops.import_scene, extension_name)
             importer(filepath=path)
 
         elif extension_name in dir(bpy.ops.import_mesh):
-            importer = getattr(bpy.ops.import_mesh)
+            importer = getattr(bpy.ops.import_mesh, extension_name)
             importer(filepath=path)
 
         elif extension_name in dir(bpy.ops.import_curve):
-            importer = getattr(bpy.ops.import_curve)
+            importer = getattr(bpy.ops.import_curve, extension_name)
             importer(filepath=path)
 
         elif extension_name in dir(bpy.ops.import_anim):
-            importer = getattr(bpy.ops.import_anim)
+            importer = getattr(bpy.ops.import_anim, extension_name)
             importer(filepath=path)
 
         else:
