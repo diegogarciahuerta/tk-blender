@@ -11,7 +11,11 @@
 # ----------------------------------------------------------------------------
 
 
+import json
 import os
+import re
+import shutil
+import subprocess
 import sys
 
 import sgtk
@@ -66,6 +70,70 @@ class BlenderLauncher(SoftwareLauncher):
         """
         return "2.8"
 
+    def _get_blender_software_info(self, exec_path):
+        '''Get the default base path for BLENDER_USER_SCRIPTS.'''
+        blender_software_info = os.path.join(
+            self.disk_location,
+            'blender_software_info.py',
+        )
+        output = subprocess.check_output(
+            '"%s" --background --python %s' %
+            (exec_path, blender_software_info),
+            shell=True,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+        )
+        if output:
+            match = re.search(r'<json>(.*)</json>', output)
+            if match:
+                return json.loads(match.group(1))
+
+    def _get_blender_user_scripts(self, exec_path):
+        '''Get the path to current user scripts directory.'''
+
+        user_scripts = os.getenv('BLENDER_USER_SCRIPTS')
+        if user_scripts:
+            return user_scripts
+
+        # If BLENDER_USER_SCRIPTS is not set, get info from executable
+        software_info = self._get_blender_software_info(exec_path)
+        if software_info:
+            return software_info['user_scripts']
+
+    def _install_shotgun_menu_py(self, user_scripts):
+        source = os.path.join(
+            self.disk_location,
+            'resources',
+            'scripts',
+            'startup',
+            'Shotgun_menu.py',
+        )
+        target = os.path.join(
+            user_scripts,
+            'startup',
+            'Shotgun_menu.py'
+        )
+        target_dir = os.path.dirname(target)
+        if not os.path.isdir(target_dir):
+            os.makedirs(target_dir)
+
+        if os.path.isfile(target):
+            source_mtime = os.path.getmtime(source)
+            target_mtime = os.path.getmtime(target)
+            if source_mtime <= target_mtime:
+                self.logger.debug(
+                    'Found existing Shotgun_menu.py in %s' % target_dir
+                )
+                return
+            else:
+                self.logger.debug('Update Shotgun_menu.py in %s' % target_dir)
+                os.remove(target)
+        else:
+            self.logger.debug('Install Shotgun_menu.py in %s' % target_dir)
+
+        shutil.copy2(source, target)
+
+
     def prepare_launch(self, exec_path, args, file_to_open=None):
         """
         Prepares an environment to launch Blender in that will automatically
@@ -79,15 +147,13 @@ class BlenderLauncher(SoftwareLauncher):
         """
         required_env = {}
 
-        # Run the engine's startup file file when Blender starts up
-        # by appending it to the env PYTHONPATH.
-        scripts_path = os.path.join(self.disk_location, "resources", "scripts")
-
-        startup_path = os.path.join(scripts_path, "startup", "Shotgun_menu.py")
-
-        args += "-P " + startup_path
-
-        required_env["BLENDER_USER_SCRIPTS"] = scripts_path
+        # Copy Shotgun_menu.py to current users BLENDER_USER_SCRIPTS directory
+        try:
+            user_scripts = self._get_blender_user_scripts(exec_path)
+            if user_scripts:
+                self._install_shotgun_menu_py(user_scripts)
+        except Exception as e:
+            self.logger.exception('Failed to install Shotgun_menu.py')
 
         if not os.environ.get("PYSIDE2_PYTHONPATH"):
             pyside2_python_path = os.path.join(self.disk_location, "python", "ext")
