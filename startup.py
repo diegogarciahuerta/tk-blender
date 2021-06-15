@@ -172,6 +172,7 @@ class BlenderLauncher(SoftwareLauncher):
         # to because the engine class has not even been instantiated yet.
         extra_args = os.environ.get("SGTK_BLENDER_CMD_EXTRA_ARGS")
 
+        # Extract all software versions matching the executable templates.
         for executable_template in executable_templates:
             executable_template = os.path.expanduser(executable_template)
             executable_template = os.path.expandvars(executable_template)
@@ -182,14 +183,16 @@ class BlenderLauncher(SoftwareLauncher):
                 executable_template, self.COMPONENT_REGEX_LOOKUP
             )
 
-            # Extract all products from that executable.
             for (executable_path, key_dict) in executable_matches:
 
-                # extract the matched keys form the key_dict.
-                # in the case of version we return something different than
-                # an empty string because there are cases were the installation
-                # directories do not include version number information.
-                executable_version = key_dict.get("version", " ")
+                # Get the version from the key_dict returned by the
+                # _glob_and_match method. If we don't match a version, try
+                # harder using _get_executable_version. Default to " " in
+                # case no version is detected from the executable_path.
+                executable_version = key_dict.get(
+                    "version",
+                    self._get_executable_version(executable_path, " ")
+                )
 
                 args = []
                 if extra_args:
@@ -206,3 +209,35 @@ class BlenderLauncher(SoftwareLauncher):
                 )
 
         return sw_versions
+
+    def _get_executable_version(self, exec_path, default=None):
+        '''Attempt to find the best possible version number from a Blender
+        executable path.'''
+
+        # On Windows and in custom installs the version may be in the exec_path
+        match = re.search(self.COMPONENT_REGEX_LOOKUP['version'], exec_path)
+        if match:
+            return match.group(0)
+
+        # On mac we may find a version folder in the apps Contents/Resources
+        if 'Blender.app' in exec_path:
+            app_dir = executable_path.split('Blender.app')[0] + 'Blender.app'
+            resources_dir = os.path.join(app_dir, 'Contents', 'Resources')
+
+            if not os.path.isdir(resources_dir):
+                return default
+
+            for file in os.listdir(resources_dir):
+                if re.match(self.COMPONENT_REGEX_LOOKUP['version'], file):
+                    return file
+
+        # On Linux we may find a version folder next to the executable
+        app_dir = os.path.dirname(exec_path)
+        if not os.path.isdir(app_dir):
+            return default
+
+        for file in os.listdir(app_dir):
+            if re.match(self.COMPONENT_REGEX_LOOKUP['version'], file):
+                return file
+
+        return default
