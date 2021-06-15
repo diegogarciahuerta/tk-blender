@@ -13,7 +13,7 @@
 
 import os
 import sys
-import imp
+import importlib.machinery
 import time
 import ast
 import inspect
@@ -250,7 +250,10 @@ def boostrap():
         sys.path.insert(0, SGTK_MODULE_PATH)
 
     engine_startup_path = os.environ.get("SGTK_BLENDER_ENGINE_STARTUP")
-    engine_startup = imp.load_source("sgtk_blender_engine_startup", engine_startup_path)
+    engine_startup = importlib.machinery.SourceFileLoader(
+        "sgtk_blender_engine_startup",
+        engine_startup_path,
+    ).load_module()
 
     # Fire up Toolkit and the environment engine.
     engine_startup.start_toolkit()
