@@ -11,7 +11,11 @@
 # ----------------------------------------------------------------------------
 
 
+import json
 import os
+import re
+import shutil
+import subprocess
 import sys
 
 import sgtk
@@ -66,6 +70,70 @@ class BlenderLauncher(SoftwareLauncher):
         """
         return "2.8"
 
+    def _get_blender_software_info(self, exec_path):
+        '''Get the default base path for BLENDER_USER_SCRIPTS.'''
+        blender_software_info = os.path.join(
+            self.disk_location,
+            'blender_software_info.py',
+        )
+        output = subprocess.check_output(
+            '"%s" --background --python %s' %
+            (exec_path, blender_software_info),
+            shell=True,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
+        )
+        if output:
+            match = re.search(r'<json>(.*)</json>', output)
+            if match:
+                return json.loads(match.group(1))
+
+    def _get_blender_user_scripts(self, exec_path):
+        '''Get the path to current user scripts directory.'''
+
+        user_scripts = os.getenv('BLENDER_USER_SCRIPTS')
+        if user_scripts:
+            return user_scripts
+
+        # If BLENDER_USER_SCRIPTS is not set, get info from executable
+        software_info = self._get_blender_software_info(exec_path)
+        if software_info:
+            return software_info['user_scripts']
+
+    def _install_shotgun_menu_py(self, user_scripts):
+        source = os.path.join(
+            self.disk_location,
+            'resources',
+            'scripts',
+            'startup',
+            'Shotgun_menu.py',
+        )
+        target = os.path.join(
+            user_scripts,
+            'startup',
+            'Shotgun_menu.py'
+        )
+        target_dir = os.path.dirname(target)
+        if not os.path.isdir(target_dir):
+            os.makedirs(target_dir)
+
+        if os.path.isfile(target):
+            source_mtime = os.path.getmtime(source)
+            target_mtime = os.path.getmtime(target)
+            if source_mtime <= target_mtime:
+                self.logger.debug(
+                    'Found existing Shotgun_menu.py in %s' % target_dir
+                )
+                return
+            else:
+                self.logger.debug('Update Shotgun_menu.py in %s' % target_dir)
+                os.remove(target)
+        else:
+            self.logger.debug('Install Shotgun_menu.py in %s' % target_dir)
+
+        shutil.copy2(source, target)
+
+
     def prepare_launch(self, exec_path, args, file_to_open=None):
         """
         Prepares an environment to launch Blender in that will automatically
@@ -79,15 +147,13 @@ class BlenderLauncher(SoftwareLauncher):
         """
         required_env = {}
 
-        # Run the engine's startup file file when Blender starts up
-        # by appending it to the env PYTHONPATH.
-        scripts_path = os.path.join(self.disk_location, "resources", "scripts")
-
-        startup_path = os.path.join(scripts_path, "startup", "Shotgun_menu.py")
-
-        args += "-P " + startup_path
-
-        required_env["BLENDER_USER_SCRIPTS"] = scripts_path
+        # Copy Shotgun_menu.py to current users BLENDER_USER_SCRIPTS directory
+        try:
+            user_scripts = self._get_blender_user_scripts(exec_path)
+            if user_scripts:
+                self._install_shotgun_menu_py(user_scripts)
+        except Exception as e:
+            self.logger.exception('Failed to install Shotgun_menu.py')
 
         if not os.environ.get("PYSIDE2_PYTHONPATH"):
             pyside2_python_path = os.path.join(self.disk_location, "python", "ext")
@@ -172,6 +238,7 @@ class BlenderLauncher(SoftwareLauncher):
         # to because the engine class has not even been instantiated yet.
         extra_args = os.environ.get("SGTK_BLENDER_CMD_EXTRA_ARGS")
 
+        # Extract all software versions matching the executable templates.
         for executable_template in executable_templates:
             executable_template = os.path.expanduser(executable_template)
             executable_template = os.path.expandvars(executable_template)
@@ -182,14 +249,16 @@ class BlenderLauncher(SoftwareLauncher):
                 executable_template, self.COMPONENT_REGEX_LOOKUP
             )
 
-            # Extract all products from that executable.
             for (executable_path, key_dict) in executable_matches:
 
-                # extract the matched keys form the key_dict.
-                # in the case of version we return something different than
-                # an empty string because there are cases were the installation
-                # directories do not include version number information.
-                executable_version = key_dict.get("version", " ")
+                # Get the version from the key_dict returned by the
+                # _glob_and_match method. If we don't match a version, try
+                # harder using _get_executable_version. Default to " " in
+                # case no version is detected from the executable_path.
+                executable_version = key_dict.get(
+                    "version",
+                    self._get_executable_version(executable_path, " ")
+                )
 
                 args = []
                 if extra_args:
@@ -206,3 +275,35 @@ class BlenderLauncher(SoftwareLauncher):
                 )
 
         return sw_versions
+
+    def _get_executable_version(self, exec_path, default=None):
+        '''Attempt to find the best possible version number from a Blender
+        executable path.'''
+
+        # On Windows and in custom installs the version may be in the exec_path
+        match = re.search(self.COMPONENT_REGEX_LOOKUP['version'], exec_path)
+        if match:
+            return match.group(0)
+
+        # On mac we may find a version folder in the apps Contents/Resources
+        if 'Blender.app' in exec_path:
+            app_dir = executable_path.split('Blender.app')[0] + 'Blender.app'
+            resources_dir = os.path.join(app_dir, 'Contents', 'Resources')
+
+            if not os.path.isdir(resources_dir):
+                return default
+
+            for file in os.listdir(resources_dir):
+                if re.match(self.COMPONENT_REGEX_LOOKUP['version'], file):
+                    return file
+
+        # On Linux we may find a version folder next to the executable
+        app_dir = os.path.dirname(exec_path)
+        if not os.path.isdir(app_dir):
+            return default
+
+        for file in os.listdir(app_dir):
+            if re.match(self.COMPONENT_REGEX_LOOKUP['version'], file):
+                return file
+
+        return default
