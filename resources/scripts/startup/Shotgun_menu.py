@@ -52,13 +52,21 @@ bl_info = {
 
 
 PYSIDE2_MISSING_MESSAGE = (
-    "\n"
-    + "-" * 80
-    + "\nCould not import PySide2 as a Python module. Shotgun menu will not be available."
-    + "\n\nPlease check the engine documentation for more information:"
-    + "\nhttps://github.com/diegogarciahuerta/tk-blender/edit/master/README.md\n"
-    + "-" * 80
-)
+    "\n{divider}\n"
+    "Could not import PySide2 as a Python module. Shotgun menu will not be "
+    "available.\n\n"
+    "Please check the engine documentation for more information:\n"
+    "  https://github.com/diegogarciahuerta/tk-blender/edit/master/README.md"
+    "\n{divider}\n"
+).format(divider='-' * 80)
+TKBLENDER_MISSING_MESSAGE = (
+    "\n{divider}\n"
+    "tk-blender Engine unavailable. Shotgun menu will not be available.\n\n"
+    "The following required Environment variables were missing:\n"
+    "    SGTK_BLENDER_ENGINE_STARTUP\n"
+    "    SGTK_MODULE_PATH"
+    "\n{divider}\n"
+).format(divider='-' * 80)
 
 try:
     from PySide2 import QtWidgets, QtCore
@@ -243,7 +251,7 @@ def insert_main_menu(menu_class, before_menu_class):
 #         layout.menu("TOPBAR_MT_help")
 
 
-def boostrap():
+def bootstrap():
     # start the engine
     SGTK_MODULE_PATH = os.environ.get("SGTK_MODULE_PATH")
     if SGTK_MODULE_PATH and SGTK_MODULE_PATH not in sys.path:
@@ -262,7 +270,7 @@ def boostrap():
 @persistent
 def startup(dummy):
     bpy.ops.screen.qt_event_loop()
-    boostrap()
+    bootstrap()
 
 
 @persistent
@@ -270,11 +278,26 @@ def error_importing_pyside2(*args):
     bpy.ops.shotgun.logger(level="ERROR", message=PYSIDE2_MISSING_MESSAGE)
 
 
+@persistent
+def debug_tkblender_missing(*args):
+    bpy.ops.shotgun.logger(level="DEBUG", message=TKBLENDER_MISSING_MESSAGE)
+
+
+def tk_blender_available():
+    return (
+        'SGTK_BLENDER_ENGINE_STARTUP' in os.environ and
+        'SGTK_MODULE_PATH' in os.environ
+    )
+
+
 def register():
     bpy.utils.register_class(ShotgunConsoleLog)
 
+    if not tk_blender_available():
+        load_factory_startup_post.append(debug_tkblender_missing)
+        return
+
     if not PYSIDE2_IMPORTED:
-        # bpy.app.timers.register(error_importing_pyside2, first_interval=5)
         load_factory_startup_post.append(error_importing_pyside2)
         return
 
@@ -291,6 +314,9 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(ShotgunConsoleLog)
+
+    if not tk_blender_available():
+        return
 
     if not PYSIDE2_IMPORTED:
         return
