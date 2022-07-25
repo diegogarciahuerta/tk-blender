@@ -281,7 +281,7 @@ class BlenderSessionGeometryPublishPlugin(HookBaseClass):
                 context,
                 filepath=publish_path,
                 selected=False,
-                renderable_only=True,
+                visible_objects_only=True,
                 uvs=True,
                 face_sets=True,
                 start=start_frame,
