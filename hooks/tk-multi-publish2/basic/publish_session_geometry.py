@@ -276,9 +276,8 @@ class BlenderSessionGeometryPublishPlugin(HookBaseClass):
 
         try:
             context = get_view3d_operator_context()
-
             version = bpy.app.version_string
-            if version[:2]) == '2.':
+            if version[:2] == '2.':
                 bpy.ops.wm.alembic_export(
                     context,
                     filepath=publish_path,
@@ -289,7 +288,7 @@ class BlenderSessionGeometryPublishPlugin(HookBaseClass):
                     start=start_frame,
                     end=end_frame,
                 )
-            if version[:2]) == '3.':
+            if version[:2] == '3.':
                 bpy.ops.wm.alembic_export(
                     context,
                     filepath=publish_path,
