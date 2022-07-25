@@ -277,16 +277,30 @@ class BlenderSessionGeometryPublishPlugin(HookBaseClass):
         try:
             context = get_view3d_operator_context()
 
-            bpy.ops.wm.alembic_export(
-                context,
-                filepath=publish_path,
-                selected=False,
-                visible_objects_only=True,
-                uvs=True,
-                face_sets=True,
-                start=start_frame,
-                end=end_frame,
-            )
+            version = bpy.app.version_string
+            if version[:2]) == '2.':
+                bpy.ops.wm.alembic_export(
+                    context,
+                    filepath=publish_path,
+                    selected=False,
+                    renderable_only=True,
+                    uvs=True,
+                    face_sets=True,
+                    start=start_frame,
+                    end=end_frame,
+                )
+            if version[:2]) == '3.':
+                bpy.ops.wm.alembic_export(
+                    context,
+                    filepath=publish_path,
+                    selected=False,
+                    visible_objects_only=True,
+                    uvs=True,
+                    face_sets=True,
+                    start=start_frame,
+                    end=end_frame,
+                )
+               
 
         except Exception as e:
             error_msg = "Failed to export Geometry: %s" % e
