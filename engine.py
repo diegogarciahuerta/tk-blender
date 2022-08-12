@@ -17,11 +17,12 @@ https://www.blender.org/
 """
 
 import os
+from pickle import REDUCE
 import sys
-import time
 import atexit
 import logging
 import traceback
+from datetime import datetime
 
 import tank
 from tank.log import LogManager
@@ -37,7 +38,7 @@ __contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 ENGINE_NAME = "tk-blender"
-ENGINE_NICE_NAME = "Shotgun Blender Engine"
+ENGINE_NICE_NAME = "SG Blender Engine"
 APPLICATION_NAME = "Blender"
 
 # env variable that control if to show the compatibility warning dialog
@@ -49,6 +50,13 @@ SHOW_COMP_DLG = "SGTK_COMPATIBILITY_DIALOG_SHOWN"
 # own risk if needed.
 MIN_COMPATIBILITY_VERSION = 2.8
 
+# Codes used for colorful logs in the console.
+class Ansi:
+    RED = "\u001b[1;31m"
+    YELLOW = "\u001b[1;33m"
+    CYAN = "\u001b[1;36m"
+    BLUE = "\u001b[1;34m"
+    RESET = "\u001b[0m"
 
 # Although the engine has logging already, this logger is needed for logging
 # where an engine may not be present.
@@ -56,26 +64,27 @@ logger = LogManager.get_logger(__name__)
 
 
 # logging functionality
-def display_message(level, msg):
-    t = time.asctime(time.localtime())
-    print("%s | %s | %s | %s " % (t, level, ENGINE_NICE_NAME, msg))
+def display_message(level, msg, color=Ansi.RESET):
+    time = datetime.now().isoformat()
+    colored_level = f"{color}{level: ^7}{Ansi.RESET}"
+    print(f"{time} | {colored_level} | {ENGINE_NICE_NAME} | {msg} ")
 
 
 def display_error(msg):
-    display_message("Error", msg)
+    display_message("ERROR", msg, Ansi.RED)
 
 
 def display_warning(msg):
-    display_message("Warning", msg)
+    display_message("WARNING", msg, Ansi.YELLOW)
 
 
 def display_info(msg):
-    display_message("Info", msg)
+    display_message("INFO", msg, Ansi.CYAN)
 
 
 def display_debug(msg):
     if os.environ.get("TK_DEBUG") == "1":
-        display_message("Debug", msg)
+        display_message("DEBUG", msg, Ansi.BLUE)
 
 
 # methods to support the state when the engine cannot start up
@@ -646,15 +655,7 @@ class BlenderEngine(Engine):
         :param record: Standard python logging record.
         :type record: :class:`~python.logging.LogRecord`
         """
-        # Give a standard format to the message:
-        #     Shotgun <basename>: <message>
-        # where "basename" is the leaf part of the logging record name,
-        # for example "tk-multi-shotgunpanel" or "qt_importer".
-        if record.levelno < logging.INFO:
-            formatter = logging.Formatter("Debug: Shotgun %(basename)s: %(message)s")
-        else:
-            formatter = logging.Formatter("Shotgun %(basename)s: %(message)s")
-
+        formatter = logging.Formatter("%(message)s")
         msg = formatter.format(record)
 
         # Select Blender display function to use according to the logging
