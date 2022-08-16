@@ -17,7 +17,6 @@ https://www.blender.org/
 """
 
 import os
-from pickle import REDUCE
 import sys
 import atexit
 import logging
