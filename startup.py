@@ -85,7 +85,7 @@ class BlenderLauncher(SoftwareLauncher):
 
         startup_path = os.path.join(scripts_path, "startup", "Shotgun_menu.py")
 
-        args += "-P " + startup_path
+        args += " -P " + startup_path
 
         required_env["BLENDER_USER_SCRIPTS"] = scripts_path
 
