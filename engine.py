@@ -15,7 +15,7 @@
 A Blender engine for Tank.
 https://www.blender.org/
 """
-
+import collections
 import os
 import sys
 import time
@@ -236,7 +236,13 @@ class BlenderEngine(Engine):
         Displays a dialog with the message according to  the severity level
         specified.
         """
-        from sgtk.platform.qt import QtGui, QtCore
+        try:
+            from sgtk.platform.qt import QtGui, QtCore
+        except ImportError:
+            logger.error("Could not import qtgui, qtcore. Called before engine init.")
+            log_level = getattr(logger, level)
+            log_level(msg)
+            return
 
         level_icon = {
             "info": QtGui.QMessageBox.Information,
@@ -330,6 +336,11 @@ class BlenderEngine(Engine):
         utf8 = QtCore.QTextCodec.codecForName("utf-8")
         QtCore.QTextCodec.setCodecForCStrings(utf8)
         self.logger.debug("set utf-8 codec for widget text")
+
+        # MutableMapping has been moved in py310. tk-multi-publish2 uses it
+        # it's faster (and dirtier) to just monkey patch here
+        from collections.abc import MutableMapping
+        collections.MutableMapping = MutableMapping
 
     def init_engine(self):
         """
@@ -508,6 +519,8 @@ class BlenderEngine(Engine):
         app = QtGui.QApplication.instance()
         app.aboutToQuit.connect(self.destroy_engine)
 
+        atexit.register(self.__force_quit_blender)
+
         # Run a series of app instance commands at startup.
         self._run_app_instance_commands()
 
@@ -611,6 +624,13 @@ class BlenderEngine(Engine):
                             setting_cmd_name,
                             known_commands,
                         )
+
+    def __force_quit_blender(self):
+        """
+        This is very dangerous as os._exit(1) force closes everything without any cleanup but as of right now, I can't
+        figure out what the process is waiting for when closing a blender process started through shotgrid
+        """
+        os._exit(1)
 
     def destroy_engine(self):
         """
